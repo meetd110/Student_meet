@@ -1,0 +1,166 @@
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Login } from "./pages/Login";
+import { Dashboard } from "./pages/Dashboard";
+import { TransferRequest } from "./pages/TransferRequest";
+import { ApplicationStatus } from "./pages/ApplicationStatus";
+import { UploadDocuments } from "./pages/UploadDocuments";
+import { Register } from "./pages/Register";
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/transfer-request" element={<TransferRequest />} />
+        <Route path="/application-status" element={<ApplicationStatus />} />
+        <Route path="/upload-documents" element={<UploadDocuments />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+
+// UI Components for Login and Register
+
+// pages/Login.js
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+export function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogin = () => {
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const user = users.find(u => u.email === email && u.password === password);
+    if (user) {
+      localStorage.setItem("loggedInUser", email);
+      navigate("/dashboard");
+    } else {
+      alert("Invalid credentials");
+    }
+  };
+
+  return (
+    <div>
+      <h2>Login</h2>
+      <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+      <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+      <button onClick={handleLogin}>Login</button>
+      <button onClick={() => navigate("/register")}>Register</button>
+    </div>
+  );
+}
+
+// pages/Register.js
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+export function Register() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const handleRegister = () => {
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    users.push({ email, password });
+    localStorage.setItem("users", JSON.stringify(users));
+    alert("User registered successfully");
+    navigate("/");
+  };
+
+  return (
+    <div>
+      <h2>Register</h2>
+      <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+      <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+      <button onClick={handleRegister}>Register</button>
+    </div>
+  );
+}
+
+// pages/TransferRequest.js
+import React, { useState } from "react";
+
+export function TransferRequest() {
+  const [formData, setFormData] = useState({ name: "", currentCollege: "", desiredCollege: "", reason: "" });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = () => {
+    const requests = JSON.parse(localStorage.getItem("transferRequests")) || [];
+    requests.push({ ...formData, status: "Pending" });
+    localStorage.setItem("transferRequests", JSON.stringify(requests));
+    alert("Transfer request submitted");
+  };
+
+  return (
+    <div>
+      <h2>Transfer Request</h2>
+      <input type="text" name="name" placeholder="Full Name" onChange={handleChange} />
+      <input type="text" name="currentCollege" placeholder="Current College" onChange={handleChange} />
+      <input type="text" name="desiredCollege" placeholder="Desired College" onChange={handleChange} />
+      <textarea name="reason" placeholder="Reason for Transfer" onChange={handleChange} />
+      <button onClick={handleSubmit}>Submit Request</button>
+    </div>
+  );
+}
+
+// pages/ApplicationStatus.js
+import React, { useEffect, useState } from "react";
+
+export function ApplicationStatus() {
+  const [requests, setRequests] = useState([]);
+
+  useEffect(() => {
+    setRequests(JSON.parse(localStorage.getItem("transferRequests")) || []);
+  }, []);
+
+  return (
+    <div>
+      <h2>Application Status</h2>
+      <ul>
+        {requests.map((req, index) => (
+          <li key={index}>{req.name} - {req.status}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// pages/UploadDocuments.js
+import React, { useState } from "react";
+
+export function UploadDocuments() {
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  const handleUpload = () => {
+    if (file) {
+      localStorage.setItem("uploadedFile", file.name);
+      alert("Document uploaded successfully");
+    } else {
+      alert("Please select a file");
+    }
+  };
+
+  return (
+    <div>
+      <h2>Upload Documents</h2>
+      <input type="file" onChange={handleFileChange} />
+      <button onClick={handleUpload}>Upload</button>
+    </div>
+  );
+}
+
+
